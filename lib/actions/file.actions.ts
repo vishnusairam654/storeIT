@@ -8,13 +8,13 @@ import { constructFileUrl, getFileType, parseStringify } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/actions/user.actions";
 import {
-  UploadFileProps,
+  DeleteFileProps,
   GetFilesProps,
   RenameFileProps,
   UpdateFileUsersProps,
-  DeleteFileProps,
+  UploadFileProps,
   FileType,
-} from "../types";
+} from "@/lib/types";
 
 const handleError = (error: unknown, message: string) => {
   console.log(error, message);
@@ -30,7 +30,8 @@ export const uploadFile = async ({
   const { storage, databases } = await createAdminClient();
 
   try {
-    const inputFile = InputFile.fromBuffer(file, file.name);
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    const inputFile = InputFile.fromBuffer(fileBuffer, file.name);
 
     const bucketFile = await storage.createFile(
       appwriteConfig.bucketId,
@@ -112,7 +113,7 @@ export const getFiles = async ({
     if (!currentUser) throw new Error("User not found");
 
     const queries = createQueries(currentUser, types, searchText, sort, limit);
-
+    console.log(queries);
     const files = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.filesCollectionId,

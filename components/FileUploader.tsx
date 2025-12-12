@@ -101,6 +101,7 @@ const FileUploader = ({ ownerId, accountId, className }) => {
                       alt="loader"
                       width={80}
                       height={26}
+                      className="h-auto"
                     />
                   </div>
                 </div>
