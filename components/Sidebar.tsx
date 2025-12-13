@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import { navItems } from "@/constants";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -28,18 +27,18 @@ const Sidebar = ({ fullName, avatar, email }: Props) => {
         />
 
         <Image
-          className="lg:hidden"
           src="/assets/icons/logo-brand.svg"
+          alt="logo"
           width={52}
           height={52}
-          alt="logo"
+          className="lg:hidden"
         />
       </Link>
 
       <nav className="sidebar-nav">
         <ul className="flex flex-1 flex-col gap-6">
           {navItems.map(({ url, name, icon }) => (
-            <Link key={name} className="lg:w-full" href={url}>
+            <Link key={name} href={url} className="lg:w-full">
               <li
                 className={cn(
                   "sidebar-nav-item",
@@ -74,12 +73,11 @@ const Sidebar = ({ fullName, avatar, email }: Props) => {
       <div className="sidebar-user-info">
         <Image
           src={avatar}
-          alt="avatar"
+          alt="Avatar"
           width={44}
           height={44}
           className="sidebar-user-avatar"
         />
-
         <div className="hidden lg:block">
           <p className="subtitle-2 capitalize">{fullName}</p>
           <p className="caption">{email}</p>
@@ -88,5 +86,4 @@ const Sidebar = ({ fullName, avatar, email }: Props) => {
     </aside>
   );
 };
-
 export default Sidebar;

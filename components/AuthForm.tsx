@@ -18,8 +18,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { createAccount, signInUser } from "@/lib/actions/user.actions";
-import OTPModal from "./OTPModal";
-// import OtpModal from "@/components/OTPModal";
+import OtpModal from "@/components/OTPModal";
 
 type FormType = "sign-in" | "sign-up";
 
@@ -60,13 +59,9 @@ const AuthForm = ({ type }: { type: FormType }) => {
             })
           : await signInUser({ email: values.email });
 
-      if (user.error) {
-        setErrorMessage(user.error);
-      } else {
-        setAccountId(user.accountId);
-      }
-    } catch (error: any) {
-      setErrorMessage(error.message);
+      setAccountId(user.accountId);
+    } catch {
+      setErrorMessage("Failed to create account. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -90,8 +85,6 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
                     <FormControl>
                       <Input
-                        id="fullName"
-                        autoComplete="name"
                         placeholder="Enter your full name"
                         className="shad-input"
                         {...field}
@@ -115,8 +108,6 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
                   <FormControl>
                     <Input
-                      id="email"
-                      autoComplete="email"
                       placeholder="Enter your email"
                       className="shad-input"
                       {...field}
@@ -167,7 +158,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
       </Form>
 
       {accountId && (
-        <OTPModal email={form.getValues("email")} accountId={accountId} />
+        <OtpModal email={form.getValues("email")} accountId={accountId} />
       )}
     </>
   );

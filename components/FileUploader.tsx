@@ -25,39 +25,62 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      setFiles(acceptedFiles);
+      const { validFiles, oversizedFiles } = acceptedFiles.reduce(
+        (acc, file) => {
+          if (file.size > MAX_FILE_SIZE) {
+            acc.oversizedFiles.push(file);
+          } else {
+            acc.validFiles.push(file);
+          }
+          return acc;
+        },
+        { validFiles: [] as File[], oversizedFiles: [] as File[] },
+      );
 
-      const uploadPromises = acceptedFiles.map(async (file) => {
-        if (file.size > MAX_FILE_SIZE) {
-          setFiles((prevFiles) =>
-            prevFiles.filter((f) => f.name !== file.name),
-          );
+      oversizedFiles.forEach((file) => {
+        toast({
+          description: (
+            <p className="body-2 text-white">
+              <span className="font-semibold">{file.name}</span> is too large.
+              Max file size is 50MB.
+            </p>
+          ),
+          className: "error-toast",
+        });
+      });
 
-          return toast({
+      setFiles((prevFiles) => [...prevFiles, ...validFiles]);
+
+      const uploadPromises = validFiles.map(async (file) => {
+        try {
+          const uploadedFile = await uploadFile({
+            file,
+            ownerId,
+            accountId,
+            path,
+          });
+          if (uploadedFile) {
+            setFiles((prevFiles) =>
+              prevFiles.filter((f) => f.name !== file.name),
+            );
+          }
+        } catch (error) {
+          console.error(`Failed to upload ${file.name}:`, error);
+          toast({
             description: (
               <p className="body-2 text-white">
-                <span className="font-semibold">{file.name}</span> is too large.
-                Max file size is 50MB.
+                <span className="font-semibold">{file.name}</span> failed to
+                upload.
               </p>
             ),
             className: "error-toast",
           });
         }
-
-        return uploadFile({ file, ownerId, accountId, path }).then(
-          (uploadedFile) => {
-            if (uploadedFile) {
-              setFiles((prevFiles) =>
-                prevFiles.filter((f) => f.name !== file.name),
-              );
-            }
-          },
-        );
       });
 
-      await Promise.all(uploadPromises);
+      await Promise.allSettled(uploadPromises);
     },
-    [ownerId, accountId, path],
+    [ownerId, accountId, path, toast],
   );
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
@@ -108,6 +131,7 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
                       width={80}
                       height={26}
                       alt="Loader"
+                      style={{ height: "auto" }}
                     />
                   </div>
                 </div>

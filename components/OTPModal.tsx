@@ -53,7 +53,7 @@ const OtpModal = ({
   };
 
   const handleResendOtp = async () => {
-    await sendEmailOTP({ email, accountId });
+    await sendEmailOTP({ email });
   };
 
   return (

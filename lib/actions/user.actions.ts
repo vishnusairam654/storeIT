@@ -2,7 +2,7 @@
 
 import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/appwrite/config";
-import { Query, ID, Client, Account } from "node-appwrite";
+import { Query, ID } from "node-appwrite";
 import { parseStringify } from "@/lib/utils";
 import { cookies } from "next/headers";
 import { avatarPlaceholderUrl } from "@/constants";
@@ -25,24 +25,11 @@ const handleError = (error: unknown, message: string) => {
   throw error;
 };
 
-export const sendEmailOTP = async ({
-  email,
-  accountId,
-}: {
-  email: string;
-  accountId?: string;
-}) => {
-  const client = new Client()
-    .setEndpoint(appwriteConfig.endpointUrl)
-    .setProject(appwriteConfig.projectId);
-
-  const account = new Account(client);
+export const sendEmailOTP = async ({ email }: { email: string }) => {
+  const { account } = await createAdminClient();
 
   try {
-    const session = await account.createEmailToken(
-      accountId || ID.unique(),
-      email,
-    );
+    const session = await account.createEmailToken(ID.unique(), email);
 
     return session.userId;
   } catch (error) {
@@ -145,12 +132,12 @@ export const signInUser = async ({ email }: { email: string }) => {
 
     // User exists, send OTP
     if (existingUser) {
-      await sendEmailOTP({ email, accountId: existingUser.accountId });
+      await sendEmailOTP({ email });
       return parseStringify({ accountId: existingUser.accountId });
     }
 
     return parseStringify({ accountId: null, error: "User not found" });
   } catch (error) {
-    return parseStringify({ error: "Failed to sign in user" });
+    handleError(error, "Failed to sign in user");
   }
 };

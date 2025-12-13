@@ -3,25 +3,24 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Search from "@/components/Search";
 import FileUploader from "@/components/FileUploader";
-import { signOutUser, getCurrentUser } from "@/lib/actions/user.actions";
+import { signOutUser } from "@/lib/actions/user.actions";
 
-const Header = async ({
+const Header = ({
   userId,
   accountId,
 }: {
   userId: string;
   accountId: string;
 }) => {
-  // const currentUser = await getCurrentUser();
-
   return (
     <header className="header">
       <Search />
       <div className="header-wrapper">
-        <FileUploader accountId={accountId} ownerId={userId} />
+        <FileUploader ownerId={userId} accountId={accountId} />
         <form
           action={async () => {
             "use server";
+
             await signOutUser();
           }}
         >
@@ -39,5 +38,4 @@ const Header = async ({
     </header>
   );
 };
-
 export default Header;

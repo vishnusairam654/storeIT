@@ -8,6 +8,8 @@ import { constructFileUrl, getFileType, parseStringify } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/actions/user.actions";
 
+import { webStreamToNodeStream } from "@/lib/node-utils";
+
 const handleError = (error: unknown, message: string) => {
   console.log(error, message);
   throw error;
@@ -22,7 +24,8 @@ export const uploadFile = async ({
   const { storage, databases } = await createAdminClient();
 
   try {
-    const inputFile = InputFile.fromBuffer(file, file.name);
+    const nodeStream = webStreamToNodeStream(file.stream());
+    const inputFile = InputFile.fromStream(nodeStream, file.name, file.size);
 
     const bucketFile = await storage.createFile(
       appwriteConfig.bucketId,
