@@ -1,14 +1,11 @@
 "use server";
 
 import { createAdminClient, createSessionClient } from "@/lib/appwrite";
-import { InputFile } from "node-appwrite/file";
 import { appwriteConfig } from "@/lib/appwrite/config";
 import { ID, Models, Query } from "node-appwrite";
 import { constructFileUrl, getFileType, parseStringify } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/actions/user.actions";
-
-import { webStreamToNodeStream } from "@/lib/node-utils";
 
 const handleError = (error: unknown, message: string) => {
   console.log(error, message);
@@ -21,17 +18,29 @@ export const uploadFile = async ({
   accountId,
   path,
 }: UploadFileProps) => {
-  const { storage, databases } = await createAdminClient();
+  const { databases, storage } = await createAdminClient();
+  const fileId = ID.unique();
+  let bucketFile;
 
   try {
-    const nodeStream = webStreamToNodeStream(file.stream());
-    const inputFile = InputFile.fromStream(nodeStream, file.name, file.size);
+    const formData = new FormData();
+    formData.append("fileId", fileId);
+    formData.append("file", file);
 
-    const bucketFile = await storage.createFile(
-      appwriteConfig.bucketId,
-      ID.unique(),
-      inputFile,
-    );
+    const response = await fetch(`${appwriteConfig.endpointUrl}/storage/buckets/${appwriteConfig.bucketId}/files`, {
+      method: 'POST',
+      headers: {
+        'X-Appwrite-Project': appwriteConfig.projectId,
+        'X-Appwrite-Key': appwriteConfig.secretKey,
+      },
+      body: formData,
+    });
+
+    bucketFile = await response.json();
+
+    if (!response.ok) {
+      throw new Error(bucketFile.message || 'Failed to upload file to storage');
+    }
 
     const fileDocument = {
       type: getFileType(bucketFile.name).type,
@@ -51,15 +60,18 @@ export const uploadFile = async ({
         appwriteConfig.filesCollectionId,
         ID.unique(),
         fileDocument,
-      )
-      .catch(async (error: unknown) => {
-        await storage.deleteFile(appwriteConfig.bucketId, bucketFile.$id);
-        handleError(error, "Failed to create file document");
-      });
+      );
 
     revalidatePath(path);
     return parseStringify(newFile);
   } catch (error) {
+    if (bucketFile) {
+      try {
+        await storage.deleteFile(appwriteConfig.bucketId, bucketFile.$id);
+      } catch (deleteError) {
+        console.error("Failed to clean up file from storage:", deleteError);
+      }
+    }
     handleError(error, "Failed to upload file");
   }
 };

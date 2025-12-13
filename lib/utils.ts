@@ -63,8 +63,8 @@ export const getFileType = (fileName: string) => {
     "afphoto",
   ];
   const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"];
-  const videoExtensions = ["mp4", "avi", "mov", "mkv", "webm"];
-  const audioExtensions = ["mp3", "wav", "ogg", "flac"];
+  const videoExtensions = ["mp4", "avi", "mov", "mkv", "webm", "m4v", "3gp", "wmv", "flv"];
+  const audioExtensions = ["mp3", "wav", "ogg", "flac", "m4a", "aac", "wma", "aiff"];
 
   if (documentExtensions.includes(extension))
     return { type: "document", extension };
@@ -183,7 +183,20 @@ export const constructDownloadUrl = (bucketFileId: string) => {
 };
 
 // DASHBOARD UTILS
-export const getUsageSummary = (totalSpace: any) => {
+interface SpaceUsage {
+  size: number;
+  latestDate: string;
+}
+
+interface TotalSpace {
+  document: SpaceUsage;
+  image: SpaceUsage;
+  video: SpaceUsage;
+  audio: SpaceUsage;
+  other: SpaceUsage;
+}
+
+export const getUsageSummary = (totalSpace: TotalSpace) => {
   return [
     {
       title: "Documents",
