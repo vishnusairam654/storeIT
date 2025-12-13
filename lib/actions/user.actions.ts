@@ -2,7 +2,7 @@
 
 import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/appwrite/config";
-import { Query, ID } from "node-appwrite";
+import { Query, ID, Client, Account } from "node-appwrite";
 import { parseStringify } from "@/lib/utils";
 import { cookies } from "next/headers";
 import { avatarPlaceholderUrl } from "@/constants";
@@ -32,7 +32,11 @@ export const sendEmailOTP = async ({
   email: string;
   accountId?: string;
 }) => {
-  const { account } = await createAdminClient();
+  const client = new Client()
+    .setEndpoint(appwriteConfig.endpointUrl)
+    .setProject(appwriteConfig.projectId);
+
+  const account = new Account(client);
 
   try {
     const session = await account.createEmailToken(
@@ -147,6 +151,6 @@ export const signInUser = async ({ email }: { email: string }) => {
 
     return parseStringify({ accountId: null, error: "User not found" });
   } catch (error) {
-    handleError(error, "Failed to sign in user");
+    return parseStringify({ error: "Failed to sign in user" });
   }
 };

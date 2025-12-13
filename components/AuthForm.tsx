@@ -55,12 +55,16 @@ const AuthForm = ({ type }: { type: FormType }) => {
       const user =
         type === "sign-up"
           ? await createAccount({
-            fullName: values.fullName || "",
-            email: values.email,
-          })
+              fullName: values.fullName || "",
+              email: values.email,
+            })
           : await signInUser({ email: values.email });
 
-      setAccountId(user.accountId);
+      if (user.error) {
+        setErrorMessage(user.error);
+      } else {
+        setAccountId(user.accountId);
+      }
     } catch (error: any) {
       setErrorMessage(error.message);
     } finally {
@@ -162,7 +166,9 @@ const AuthForm = ({ type }: { type: FormType }) => {
         </form>
       </Form>
 
-      {accountId && <OTPModal email={form.getValues("email")} accountId={accountId} />}
+      {accountId && (
+        <OTPModal email={form.getValues("email")} accountId={accountId} />
+      )}
     </>
   );
 };
