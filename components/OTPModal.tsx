@@ -18,7 +18,8 @@ import {
 import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { verifySecret, sendEmailOTP } from "@/lib/actions/user.actions";
+import { sendEmailOTP } from "@/lib/actions/user.actions";
+import { account } from "@/lib/appwrite/client";
 import { useRouter } from "next/navigation";
 
 const OtpModal = ({
@@ -33,27 +34,33 @@ const OtpModal = ({
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const isSubmitDisabled = password.length !== 6 || isLoading;
+
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    if (isSubmitDisabled) return;
+
     setIsLoading(true);
 
-    console.log({ accountId, password });
-
     try {
-      const sessionId = await verifySecret({ accountId, password });
+      // Use Client SDK to create session - Browser automatically handles cookies!
+      // This bypasses the server-side cookie setting issues.
+      const session = await account.createSession(accountId, password);
 
-      console.log({ sessionId });
-
-      if (sessionId) router.push("/");
+      if (session) {
+        console.log("Session created via Client SDK:", session);
+        window.location.href = "/";
+      }
     } catch (error) {
       console.log("Failed to verify OTP", error);
+      alert("Failed to verify OTP: " + (error as Error).message);
     }
 
     setIsLoading(false);
   };
 
   const handleResendOtp = async () => {
-    await sendEmailOTP({ email });
+    await sendEmailOTP({ userId: accountId, email });
   };
 
   return (
@@ -77,7 +84,12 @@ const OtpModal = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <InputOTP maxLength={6} value={password} onChange={setPassword}>
+        <InputOTP
+          maxLength={6}
+          value={password}
+          onChange={setPassword}
+          autoFocus
+        >
           <InputOTPGroup className="shad-otp">
             <InputOTPSlot index={0} className="shad-otp-slot" />
             <InputOTPSlot index={1} className="shad-otp-slot" />
@@ -94,6 +106,7 @@ const OtpModal = ({
               onClick={handleSubmit}
               className="shad-submit-btn h-12"
               type="button"
+              disabled={isSubmitDisabled}
             >
               Submit
               {isLoading && (

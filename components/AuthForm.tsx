@@ -54,14 +54,22 @@ const AuthForm = ({ type }: { type: FormType }) => {
       const user =
         type === "sign-up"
           ? await createAccount({
-              fullName: values.fullName || "",
-              email: values.email,
-            })
+            fullName: values.fullName || "",
+            email: values.email,
+          })
           : await signInUser({ email: values.email });
 
+      console.log("Auth result:", user);
+
+      if (user?.error) {
+        setErrorMessage(user.error);
+        return;
+      }
+
       setAccountId(user.accountId);
-    } catch {
-      setErrorMessage("Failed to create account. Please try again.");
+    } catch (error) {
+      console.error("Auth Error:", error);
+      setErrorMessage(type === "sign-in" ? "Failed to sign in" : "Failed to create account");
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +78,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="auth-form">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="auth-form bg-surface shadow-elevation-3 rounded-[28px] px-10 py-12 border border-outline-variant/30 animate-fade-in-up">
           <h1 className="form-title">
             {type === "sign-in" ? "Sign In" : "Sign Up"}
           </h1>
@@ -88,6 +96,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
                         placeholder="Enter your full name"
                         className="shad-input"
                         {...field}
+                        autoComplete="name"
                       />
                     </FormControl>
                   </div>
@@ -111,6 +120,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
                       placeholder="Enter your email"
                       className="shad-input"
                       {...field}
+                      autoComplete="email"
                     />
                   </FormControl>
                 </div>

@@ -11,6 +11,8 @@ export const createSessionClient = async () => {
 
   const session = (await cookies()).get("appwrite-session");
 
+  console.log("[DEBUG] createSessionClient - cookie value:", session?.value ? "exists (" + session.value.substring(0, 20) + "...)" : "NOT FOUND");
+
   if (!session || !session.value) throw new Error("No session");
 
   client.setSession(session.value);
