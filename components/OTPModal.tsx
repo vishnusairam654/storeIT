@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import Image from "next/image";
+"use client";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,7 +8,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 import {
@@ -16,11 +15,13 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { Button } from "./ui/button";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
 import { verifySecret, sendEmailOTP } from "@/lib/actions/user.actions";
+import { useRouter } from "next/navigation";
 
-const OTPModal = ({
+const OtpModal = ({
   accountId,
   email,
 }: {
@@ -28,36 +29,27 @@ const OTPModal = ({
   email: string;
 }) => {
   const router = useRouter();
-  const [isOpen, setisOpen] = useState(true);
-  const [password, setpassword] = useState("");
-  const [isLoading, setisLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handlePasswordChange = (newPassword: string) => {
-    setpassword(newPassword);
-    if (error) {
-      setError("");
-    }
-  };
+  const [isOpen, setIsOpen] = useState(true);
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    setisLoading(true);
-    setError("");
+    setIsLoading(true);
+
+    console.log({ accountId, password });
+
     try {
       const sessionId = await verifySecret({ accountId, password });
 
-      if (sessionId) {
-        router.push("/");
-      } else {
-        setError("Wrong OTP. Please try again.");
-      }
+      console.log({ sessionId });
+
+      if (sessionId) router.push("/");
     } catch (error) {
       console.log("Failed to verify OTP", error);
-      setError("Failed to verify OTP. Please try again.");
-    } finally {
-      setisLoading(false);
     }
+
+    setIsLoading(false);
   };
 
   const handleResendOtp = async () => {
@@ -65,8 +57,7 @@ const OTPModal = ({
   };
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={setisOpen}>
-      <AlertDialogTrigger>Open</AlertDialogTrigger>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogContent className="shad-alert-dialog">
         <AlertDialogHeader className="relative flex justify-center">
           <AlertDialogTitle className="h2 text-center">
@@ -76,21 +67,17 @@ const OTPModal = ({
               alt="close"
               width={20}
               height={20}
-              onClick={() => setisOpen(false)}
+              onClick={() => setIsOpen(false)}
               className="otp-close-button"
             />
           </AlertDialogTitle>
           <AlertDialogDescription className="subtitle-2 text-center text-light-100">
-            We have sent a One Time Password (OTP) to{" "}
-            <span className="text-brand">{email}</span>
-            {error && <p className="text-brand ">{error}</p>}
+            We&apos;ve sent a code to{" "}
+            <span className="pl-1 text-brand">{email}</span>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <InputOTP
-          maxLength={6}
-          value={password}
-          onChange={handlePasswordChange}
-        >
+
+        <InputOTP maxLength={6} value={password} onChange={setPassword}>
           <InputOTPGroup className="shad-otp">
             <InputOTPSlot index={0} className="shad-otp-slot" />
             <InputOTPSlot index={1} className="shad-otp-slot" />
@@ -104,8 +91,8 @@ const OTPModal = ({
         <AlertDialogFooter>
           <div className="flex w-full flex-col gap-4">
             <AlertDialogAction
-              className="shad-submit-btn h-12"
               onClick={handleSubmit}
+              className="shad-submit-btn h-12"
               type="button"
             >
               Submit
@@ -120,15 +107,15 @@ const OTPModal = ({
               )}
             </AlertDialogAction>
 
-            <div className="subtitle-2 mt-2 text-center">
-              Didn&apos;t receive the OTP?{" "}
+            <div className="subtitle-2 mt-2 text-center text-light-100">
+              Didn&apos;t get a code?
               <Button
                 type="button"
                 variant="link"
                 className="pl-1 text-brand"
                 onClick={handleResendOtp}
               >
-                Click To resend OTP
+                Click to resend
               </Button>
             </div>
           </div>
@@ -138,4 +125,4 @@ const OTPModal = ({
   );
 };
 
-export default OTPModal;
+export default OtpModal;

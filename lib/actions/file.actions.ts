@@ -7,14 +7,6 @@ import { ID, Models, Query } from "node-appwrite";
 import { constructFileUrl, getFileType, parseStringify } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/actions/user.actions";
-import {
-  DeleteFileProps,
-  GetFilesProps,
-  RenameFileProps,
-  UpdateFileUsersProps,
-  UploadFileProps,
-  FileType,
-} from "@/lib/types";
 
 const handleError = (error: unknown, message: string) => {
   console.log(error, message);
@@ -30,8 +22,7 @@ export const uploadFile = async ({
   const { storage, databases } = await createAdminClient();
 
   try {
-    const fileBuffer = Buffer.from(await file.arrayBuffer());
-    const inputFile = InputFile.fromBuffer(fileBuffer, file.name);
+    const inputFile = InputFile.fromBuffer(file, file.name);
 
     const bucketFile = await storage.createFile(
       appwriteConfig.bucketId,
@@ -113,7 +104,7 @@ export const getFiles = async ({
     if (!currentUser) throw new Error("User not found");
 
     const queries = createQueries(currentUser, types, searchText, sort, limit);
-    console.log(queries);
+
     const files = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.filesCollectionId,
@@ -173,7 +164,7 @@ export const updateFileUsers = async ({
     revalidatePath(path);
     return parseStringify(updatedFile);
   } catch (error) {
-    handleError(error, "Failed to update file users");
+    handleError(error, "Failed to rename file");
   }
 };
 
@@ -198,7 +189,7 @@ export const deleteFile = async ({
     revalidatePath(path);
     return parseStringify({ status: "success" });
   } catch (error) {
-    handleError(error, "Failed to delete file");
+    handleError(error, "Failed to rename file");
   }
 };
 

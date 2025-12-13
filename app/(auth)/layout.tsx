@@ -1,3 +1,4 @@
+import React from "react";
 import Image from "next/image";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
@@ -25,7 +26,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             width={342}
             height={342}
             className="transition-all hover:rotate-2 hover:scale-105"
-            priority
           />
         </div>
       </section>
@@ -38,7 +38,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             width={224}
             height={82}
             className="h-auto w-[200px] lg:w-[250px]"
-            priority
           />
         </div>
 

@@ -86,6 +86,8 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
                     <FormControl>
                       <Input
+                        id="fullName"
+                        autoComplete="name"
                         placeholder="Enter your full name"
                         className="shad-input"
                         {...field}
@@ -109,6 +111,8 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
                   <FormControl>
                     <Input
+                      id="email"
+                      autoComplete="email"
                       placeholder="Enter your email"
                       className="shad-input"
                       {...field}
