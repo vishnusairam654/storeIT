@@ -35,7 +35,7 @@ const authFormSchema = (formType: FormType) => {
 const AuthForm = ({ type }: { type: FormType }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [accountId, setAccountId] = useState(null);
+  const [accountId, setAccountId] = useState<string | null>(null);
 
   const formSchema = authFormSchema(type);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -51,29 +51,52 @@ const AuthForm = ({ type }: { type: FormType }) => {
     setErrorMessage("");
 
     try {
-      const user =
-        type === "sign-up"
-          ? await createAccount({
-            fullName: values.fullName || "",
-            email: values.email,
-          })
-          : await signInUser({ email: values.email });
+      console.log("Starting auth process...", { type, email: values.email });
 
-      console.log("Auth result:", user);
+      let user;
 
+      if (type === "sign-up") {
+        console.log("Creating new account...");
+        user = await createAccount({
+          fullName: values.fullName || "",
+          email: values.email,
+        });
+      } else {
+        console.log("Signing in existing user...");
+        user = await signInUser({ email: values.email });
+      }
+
+      console.log("Auth response received:", user);
+
+      // Check for error in response
       if (user?.error) {
+        console.error("Error from server:", user.error);
         setErrorMessage(user.error);
         return;
       }
 
+      // Check if accountId exists
+      if (!user?.accountId) {
+        console.error("No accountId in response:", user);
+        setErrorMessage("Failed to get account ID. Please try again.");
+        return;
+      }
+
+      console.log("Setting accountId:", user.accountId);
       setAccountId(user.accountId);
+
+      console.log("OTP Modal should now appear!");
     } catch (error) {
       console.error("Auth Error:", error);
-      setErrorMessage(type === "sign-in" ? "Failed to sign in" : "Failed to create account");
+      const errorMsg = error instanceof Error ? error.message : "An error occurred";
+      setErrorMessage(errorMsg);
     } finally {
       setIsLoading(false);
     }
   };
+
+  console.log("Current accountId state:", accountId);
+  console.log("Should show OTP modal:", !!accountId);
 
   return (
     <>
@@ -167,6 +190,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
         </form>
       </Form>
 
+      {/* OTP Modal - Show when we have an accountId */}
       {accountId && (
         <OtpModal email={form.getValues("email")} accountId={accountId} />
       )}

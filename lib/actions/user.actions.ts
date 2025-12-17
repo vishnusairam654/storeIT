@@ -2,7 +2,7 @@
 
 import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/appwrite/config";
-import { Client, Account, Query, ID } from "node-appwrite";
+import { Query, ID } from "node-appwrite";
 import { parseStringify } from "@/lib/utils";
 import { cookies } from "next/headers";
 import { avatarPlaceholderUrl } from "@/constants";
@@ -26,12 +26,14 @@ const handleError = (error: unknown, message: string) => {
 };
 
 export const sendEmailOTP = async ({ userId, email }: { userId: string, email: string }) => {
-  const { account } = await createAdminClient();
   try {
-    await account.createEmailToken(userId, email);
+    const { account } = await createAdminClient();
+    const token = await account.createEmailToken(userId, email);
+    console.log("OTP sent successfully to:", email);
     return userId;
   } catch (error) {
-    handleError(error, "Failed to send email OTP");
+    console.error("Failed to send email OTP:", error);
+    throw error;
   }
 };
 
@@ -42,16 +44,15 @@ export const createAccount = async ({
   fullName: string;
   email: string;
 }) => {
-  const existingUser = await getUserByEmail(email);
-  if (existingUser) {
-    throw new Error("User with this email already exists.");
-  }
-
-  const { account, databases } = await createAdminClient();
-
   try {
-    const newUser = await account.create(ID.unique(), email, "tempPassword123!", fullName);
+    const existingUser = await getUserByEmail(email);
+    if (existingUser) {
+      return { accountId: null, error: "User with this email already exists." };
+    }
 
+    const { account, databases } = await createAdminClient();
+
+    const newUser = await account.create(ID.unique(), email, "tempPassword123!", fullName);
     const newUserId = newUser.$id;
 
     await databases.createDocument(
@@ -66,15 +67,16 @@ export const createAccount = async ({
       },
     );
 
-    const accountId = await sendEmailOTP({ userId: newUserId, email });
-    if (!accountId) throw new Error("Failed to send an OTP");
+    await sendEmailOTP({ userId: newUserId, email });
 
+    console.log("Account created successfully, returning accountId:", newUserId);
     return parseStringify({ accountId: newUserId });
   } catch (error) {
-    // If account creation in appwrite fails, we don't proceed.
-    // If db document creation fails, we should ideally delete the appwrite user.
-    // For now, we'll just let the error propagate.
-    handleError(error, "Failed to create account");
+    console.error("Failed to create account:", error);
+    return {
+      accountId: null,
+      error: error instanceof Error ? error.message : "Failed to create account"
+    };
   }
 };
 
@@ -86,90 +88,63 @@ export const verifySecret = async ({
   password: string;
 }) => {
   try {
-    // Use raw fetch to bypass SDK potential issues
-    // Endpoint for OTP (Token) exchange is /account/sessions/token? Or just /account/sessions?
-    // Error "Param email is not optional" suggests we hit email/password endpoint.
-    // Let's try /account/sessions/email -> NO, that's for password.
-    // Let's try /account/sessions/token (Exchange token for session)
-    const response = await fetch(`${appwriteConfig.endpointUrl}/account/sessions/token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Appwrite-Project': appwriteConfig.projectId,
-      },
-      body: JSON.stringify({
-        userId: accountId,
-        secret: password,
-      }),
-    });
+    console.log("Verifying OTP for account:", accountId);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API Error: ${response.status} - ${errorText}`);
-    }
+    // ✅ Use Appwrite SDK - it handles the API call properly
+    const { account } = await createAdminClient();
+    const session = await account.createSession(accountId, password);
 
-    const session = await response.json();
+    console.log("Session created successfully:", session.$id);
 
-    console.log("[DEBUG] Raw Fetch Result Keys:", Object.keys(session));
-
-    let secret = session.secret;
-
-    if (!secret) {
-      console.log("[DEBUG] Secret missing in body. Checking headers...");
-      const setCookie = response.headers.get("set-cookie");
-      console.log("[DEBUG] Set-Cookie Header:", setCookie);
-
-      if (setCookie) {
-        const match = setCookie.match(/appwrite-session=([^;]+)/);
-        if (match) {
-          secret = match[1];
-          console.log("[DEBUG] Found secret in header!");
-        }
-      }
-    }
-
-    if (!secret) {
-      // Only throw if strictly required, but for debugging let's log everything
-      console.error("FATAL: Secret not found in body OR headers.");
-      // Dump headers for debug
-      response.headers.forEach((val, key) => console.log(`[HEADER] ${key}: ${val}`));
-
-      throw new Error("Secret missing from raw API response");
-    }
-
-    // Force strict manual cookie setting on server first, although it fails usually
-    (await cookies()).set("appwrite-session", secret, {
+    // ✅ Set cookie with session ID
+    (await cookies()).set("appwrite-session", session.$id, {
       path: "/",
       httpOnly: true,
       sameSite: "lax",
-      secure: false, // For localhost
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60,
     });
 
-    // AND return it to client for fallback
-    return parseStringify({ sessionId: session.$id, secret: secret });
+    // ✅ Set account ID cookie
+    (await cookies()).set("appwrite-account-id", accountId, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60,
+    });
+
+    console.log("Cookies set successfully");
+    return parseStringify({ success: true });
   } catch (error) {
-    handleError(error, "Failed to verify OTP");
+    console.error("Verify secret error:", error);
+    throw new Error(error instanceof Error ? error.message : "Failed to verify OTP");
   }
 };
 
 export const getCurrentUser = async () => {
   try {
-    const { databases, account } = await createSessionClient();
+    // ✅ Get account ID from cookie instead of calling account.get()
+    const accountIdCookie = (await cookies()).get("appwrite-account-id");
 
-    const result = await account.get();
+    if (!accountIdCookie || !accountIdCookie.value) {
+      return null;
+    }
+
+    const { databases } = await createAdminClient();
 
     const user = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.usersCollectionId,
-      [Query.equal("accountId", result.$id)],
+      [Query.equal("accountId", accountIdCookie.value)],
     );
 
     if (user.total <= 0) return null;
 
     return parseStringify(user.documents[0]);
   } catch (error) {
-    console.log(error);
+    console.log("Failed to get current user:", error);
+    return null;
   }
 };
 
@@ -179,6 +154,7 @@ export const signOutUser = async () => {
   try {
     await account.deleteSession("current");
     (await cookies()).delete("appwrite-session");
+    (await cookies()).delete("appwrite-account-id"); // ✅ Also delete account ID cookie
   } catch (error) {
     handleError(error, "Failed to sign out user");
   }
@@ -191,17 +167,23 @@ export const signInUser = async ({ email }: { email: string }) => {
   try {
     const existingUser = await getUserByEmail(email);
 
-    if (existingUser) {
-      // Validate that accountId exists
-      if (!existingUser.accountId) {
-        throw new Error("User account is corrupted - missing accountId. Please contact support.");
-      }
-      await sendEmailOTP({ userId: existingUser.accountId, email });
-      return parseStringify({ accountId: existingUser.accountId });
+    if (!existingUser) {
+      return { accountId: null, error: "User not found" };
     }
 
-    return parseStringify({ accountId: null, error: "User not found" });
+    if (!existingUser.accountId) {
+      return { accountId: null, error: "User account is corrupted - missing accountId." };
+    }
+
+    await sendEmailOTP({ userId: existingUser.accountId, email });
+
+    console.log("Sign-in successful, returning accountId:", existingUser.accountId);
+    return parseStringify({ accountId: existingUser.accountId });
   } catch (error) {
-    handleError(error, "Failed to sign in user");
+    console.error("Failed to sign in user:", error);
+    return {
+      accountId: null,
+      error: error instanceof Error ? error.message : "Failed to sign in"
+    };
   }
 };

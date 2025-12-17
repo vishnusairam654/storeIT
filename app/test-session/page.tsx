@@ -1,7 +1,12 @@
 
 import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
 
 export default async function TestSessionPage() {
+    if (process.env.NODE_ENV === 'production') {
+        notFound();
+    }
+
     const cookieStore = await cookies();
     const allCookies = cookieStore.getAll();
 

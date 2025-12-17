@@ -21,20 +21,31 @@ const Search = () => {
   const [debouncedQuery] = useDebounce(query, 300);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchFiles = async () => {
       if (debouncedQuery.length === 0) {
-        setResults([]);
-        setOpen(false);
-        return router.push(path.replace(searchParams.toString(), ""));
+        if (isMounted) {
+          setResults([]);
+          setOpen(false);
+          router.push(path.replace(searchParams.toString(), ""));
+        }
+        return;
       }
 
       const files = await getFiles({ types: [], searchText: debouncedQuery });
-      setResults(files.documents);
-      setOpen(true);
+      if (isMounted) {
+        setResults(files.documents);
+        setOpen(true);
+      }
     };
 
     fetchFiles();
-  }, [debouncedQuery]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [debouncedQuery, path, router, searchParams]);
 
   useEffect(() => {
     if (!searchQuery) {

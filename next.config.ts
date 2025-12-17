@@ -1,12 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  // ✅ REMOVED: ignoreBuildErrors: true
+  // This was hiding real TypeScript errors that need to be fixed
+
   experimental: {
     serverActions: {
-      bodySizeLimit: "250mb", // This is crucial for media uploads
+      bodySizeLimit: "250mb", // Critical for media uploads
     },
   },
   images: {
@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "fra.cloud.appwrite.io", // Merged from your .js file
+        hostname: "fra.cloud.appwrite.io",
       },
     ],
   },

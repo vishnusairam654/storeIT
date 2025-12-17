@@ -18,8 +18,7 @@ import {
 import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { sendEmailOTP } from "@/lib/actions/user.actions";
-import { account } from "@/lib/appwrite/client";
+import { sendEmailOTP, verifySecret } from "@/lib/actions/user.actions";
 import { useRouter } from "next/navigation";
 
 const OtpModal = ({
@@ -43,20 +42,19 @@ const OtpModal = ({
     setIsLoading(true);
 
     try {
-      // Use Client SDK to create session - Browser automatically handles cookies!
-      // This bypasses the server-side cookie setting issues.
-      const session = await account.createSession(accountId, password);
+      // ✅ Use server action to create session and set cookie properly
+      const result = await verifySecret({ accountId, password });
 
-      if (session) {
-        console.log("Session created via Client SDK:", session);
-        window.location.href = "/";
+      if (result) {
+        router.push("/");
+        router.refresh();
       }
     } catch (error) {
-      console.log("Failed to verify OTP", error);
+      console.error("Failed to verify OTP", error);
       alert("Failed to verify OTP: " + (error as Error).message);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleResendOtp = async () => {
