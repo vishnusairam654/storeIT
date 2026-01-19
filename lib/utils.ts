@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { TOTAL_STORAGE_SPACE } from "@/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -25,8 +26,7 @@ export const convertFileSize = (sizeInBytes: number, digits?: number) => {
 };
 
 export const calculatePercentage = (sizeInBytes: number) => {
-  const totalSizeInBytes = 2 * 1024 * 1024 * 1024; // 2GB in bytes
-  const percentage = (sizeInBytes / totalSizeInBytes) * 100;
+  const percentage = (sizeInBytes / TOTAL_STORAGE_SPACE) * 100;
   return Number(percentage.toFixed(2));
 };
 
@@ -59,7 +59,6 @@ export const getFileType = (fileName: string) => {
     "xd",
     "sketch",
     "afdesign",
-    "afphoto",
     "afphoto",
   ];
   const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"];
@@ -204,6 +203,8 @@ export const getUsageSummary = (totalSpace: TotalSpace) => {
       latestDate: totalSpace.document.latestDate,
       icon: "/assets/icons/file-document-light.svg",
       url: "/documents",
+      color: "bg-green",
+      hoverColor: "group-hover:text-green",
     },
     {
       title: "Images",
@@ -211,6 +212,8 @@ export const getUsageSummary = (totalSpace: TotalSpace) => {
       latestDate: totalSpace.image.latestDate,
       icon: "/assets/icons/file-image-light.svg",
       url: "/images",
+      color: "bg-blue",
+      hoverColor: "group-hover:text-blue",
     },
     {
       title: "Media",
@@ -221,6 +224,8 @@ export const getUsageSummary = (totalSpace: TotalSpace) => {
           : totalSpace.audio.latestDate,
       icon: "/assets/icons/file-video-light.svg",
       url: "/media",
+      color: "bg-orange",
+      hoverColor: "group-hover:text-orange",
     },
     {
       title: "Others",
@@ -228,6 +233,8 @@ export const getUsageSummary = (totalSpace: TotalSpace) => {
       latestDate: totalSpace.other.latestDate,
       icon: "/assets/icons/file-other-light.svg",
       url: "/others",
+      color: "bg-pink",
+      hoverColor: "group-hover:text-pink",
     },
   ];
 };

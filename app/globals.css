@@ -99,7 +99,7 @@
 
 @layer base {
   * {
-    @apply scroll-smooth;
+    @apply scroll-smooth border-border;
   }
 
   body {
@@ -148,6 +148,13 @@
     --accent-foreground: 0 0% 9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
+
+    /* Custom class to satisfy linter for component selections */
+    .destructive {
+      --tw-text-opacity: 1;
+      color: rgba(185, 28, 28, var(--tw-text-opacity));
+    }
+
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
     --ring: 0 0% 3.9%;
@@ -224,6 +231,10 @@
 
   .body-2 {
     @apply text-[14px] leading-[20px] font-normal;
+  }
+
+  .caption {
+    @apply text-[12px] leading-[16px] font-normal text-light-200;
   }
 
   .button {
@@ -618,15 +629,5 @@
 
   .thumbnail-image {
     @apply size-full object-cover object-center !important;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,21 @@ const Search = () => {
   const router = useRouter();
   const path = usePathname();
   const [debouncedQuery] = useDebounce(query, 300);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Click outside handler to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -63,7 +78,7 @@ const Search = () => {
   };
 
   return (
-    <div className="search">
+    <div className="search" ref={searchRef}>
       <div className="search-input-wrapper">
         <Image
           src="/assets/icons/search.svg"

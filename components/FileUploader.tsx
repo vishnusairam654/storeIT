@@ -42,7 +42,7 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
           description: (
             <p className="body-2 text-white">
               <span className="font-semibold">{file.name}</span> is too large.
-              Max file size is 50MB.
+              Max file size is 250MB.
             </p>
           ),
           className: "error-toast",
@@ -96,12 +96,13 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
   return (
     <div {...getRootProps()} className="cursor-pointer">
       <input {...getInputProps()} />
-      <Button type="button" className={cn("uploader-button", className)}>
+      <Button type="button" className={cn("uploader-button group transition-all hover:scale-105 hover:shadow-lg hover:!bg-[#FF7F7F] active:scale-95", className)}>
         <Image
           src="/assets/icons/upload.svg"
           alt="upload"
           width={24}
           height={24}
+          className="transition-transform group-hover:-translate-y-0.5"
         />{" "}
         <p>Upload</p>
       </Button>

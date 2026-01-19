@@ -51,43 +51,31 @@ const AuthForm = ({ type }: { type: FormType }) => {
     setErrorMessage("");
 
     try {
-      console.log("Starting auth process...", { type, email: values.email });
-
       let user;
 
       if (type === "sign-up") {
-        console.log("Creating new account...");
         user = await createAccount({
           fullName: values.fullName || "",
           email: values.email,
         });
       } else {
-        console.log("Signing in existing user...");
         user = await signInUser({ email: values.email });
       }
 
-      console.log("Auth response received:", user);
-
       // Check for error in response
       if (user?.error) {
-        console.error("Error from server:", user.error);
         setErrorMessage(user.error);
         return;
       }
 
       // Check if accountId exists
       if (!user?.accountId) {
-        console.error("No accountId in response:", user);
         setErrorMessage("Failed to get account ID. Please try again.");
         return;
       }
 
-      console.log("Setting accountId:", user.accountId);
       setAccountId(user.accountId);
-
-      console.log("OTP Modal should now appear!");
     } catch (error) {
-      console.error("Auth Error:", error);
       const errorMsg = error instanceof Error ? error.message : "An error occurred";
       setErrorMessage(errorMsg);
     } finally {
@@ -95,8 +83,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
     }
   };
 
-  console.log("Current accountId state:", accountId);
-  console.log("Should show OTP modal:", !!accountId);
+
 
   return (
     <>

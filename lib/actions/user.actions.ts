@@ -97,7 +97,7 @@ export const verifySecret = async ({
     console.log("Session created successfully:", session.$id);
 
     // ✅ Set cookie with session ID
-    (await cookies()).set("appwrite-session", session.secret, {
+     (await cookies()).set("appwrite-session", session.secret, {
       path: "/",
       httpOnly: true,
       sameSite: "lax",

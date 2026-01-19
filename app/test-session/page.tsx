@@ -21,7 +21,7 @@ export default async function TestSessionPage() {
                 <ul className="list-disc ml-5">
                     <li>
                         appwrite-session found?{" "}
-                        <span className={cookieStore.has("appwrite-session") ? "text-green-600 font-bold" : "text-red-600 font-bold"}>
+                        <span className={cookieStore.has("appwrite-session") ? "font-bold text-green" : "font-bold text-red"}>
                             {cookieStore.has("appwrite-session") ? "YES" : "NO"}
                         </span>
                     </li>
