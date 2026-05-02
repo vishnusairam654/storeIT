@@ -1,0 +1,9 @@
+{
+  "root": true,
+  "extends": ["next/core-web-vitals", "next/typescript", "plugin:tailwindcss/recommended", "prettier" ],
+  "rules": {
+    "no-undef": "off",
+    "tailwindcss/classnames-order": "off",
+    "tailwindcss/migration-from-tailwind-2": "off"
+  }
+}

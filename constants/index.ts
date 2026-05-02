@@ -1,0 +1,98 @@
+export const navItems = [
+  {
+    name: "Dashboard",
+    icon: "/assets/icons/dashboard.svg",
+    url: "/",
+    color: "text-brand",
+    bgColor: "bg-brand",
+  },
+  {
+    name: "Documents",
+    icon: "/assets/icons/documents.svg",
+    url: "/documents",
+    color: "text-blue",
+    bgColor: "bg-blue",
+  },
+  {
+    name: "Images",
+    icon: "/assets/icons/images.svg",
+    url: "/images",
+    color: "text-green",
+    bgColor: "bg-green",
+  },
+  {
+    name: "Media",
+    icon: "/assets/icons/video.svg",
+    url: "/media",
+    color: "text-pink",
+    bgColor: "bg-pink",
+  },
+  {
+    name: "Others",
+    icon: "/assets/icons/others.svg",
+    url: "/others",
+    color: "text-orange",
+    bgColor: "bg-orange",
+  },
+];
+
+export const actionsDropdownItems = [
+  {
+    label: "Rename",
+    icon: "/assets/icons/edit.svg",
+    value: "rename",
+  },
+  {
+    label: "Details",
+    icon: "/assets/icons/info.svg",
+    value: "details",
+  },
+  {
+    label: "Share",
+    icon: "/assets/icons/share.svg",
+    value: "share",
+  },
+  {
+    label: "Download",
+    icon: "/assets/icons/download.svg",
+    value: "download",
+  },
+  {
+    label: "Delete",
+    icon: "/assets/icons/delete.svg",
+    value: "delete",
+  },
+];
+
+export const sortTypes = [
+  {
+    label: "Date created (newest)",
+    value: "$createdAt-desc",
+  },
+  {
+    label: "Created Date (oldest)",
+    value: "$createdAt-asc",
+  },
+  {
+    label: "Name (A-Z)",
+    value: "name-asc",
+  },
+  {
+    label: "Name (Z-A)",
+    value: "name-desc",
+  },
+  {
+    label: "Size (Highest)",
+    value: "size-desc",
+  },
+  {
+    label: "Size (Lowest)",
+    value: "size-asc",
+  },
+];
+
+export const avatarPlaceholderUrl =
+  "https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436188.jpg";
+
+export const MAX_FILE_SIZE = 250 * 1024 * 1024; // 250MB
+export const TOTAL_STORAGE_SPACE = 2 * 1024 * 1024 * 1024; // 2GB
