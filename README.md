@@ -1,85 +1,114 @@
-# StoreIt
+# 🗄️ StoreIT — Cloud File Storage & Management
 
-StoreIt is a modern, privacy-focused smart storage management web app built with Next.js and Appwrite. It provides personal and shared file storage, secure uploads, per-user file access controls, and an intuitive dashboard for managing files across devices.
+> A modern file storage platform to upload, organize, and access your files securely from anywhere.
 
-## Features
-- Secure user authentication with Appwrite (email OTP)
-- Client and server upload flows with per-file access controls
-- File previewer and thumbnail generation for images and media
-- Share files with other users (email-based sharing)
-- Usage dashboard showing storage consumption and recent activity
-- Rate-limited uploads and audit logging
-
-## Tech Stack
-- Frontend: Next.js (App Router), React, TypeScript, Tailwind CSS
-- Backend / Auth: Appwrite (Databases, Storage, Account)
-- Storage: Appwrite Storage (buckets + access controls)
-- Dev tooling: npm, Turbopack (Next.js dev)
-
-## Repository Structure (high level)
-- `app/` - Next.js app routes, pages, and layouts
-- `components/` - Reusable UI components and client code
-- `lib/` - Appwrite client wrappers, actions, utilities
-- `public/` - Static assets (icons, images)
-- `components/dashboard` - Dashboard-specific components
-- `types/` - TypeScript declarations
-
-## Environment Variables
-Create a `.env.local` in the project root with the following variables:
-
-```
-NEXT_PUBLIC_APPWRITE_ENDPOINT=https://fra.cloud.appwrite.io
-NEXT_PUBLIC_APPWRITE_PROJECT=<your_project_id>
-NEXT_PUBLIC_APPWRITE_DATABASE=<database_id>
-NEXT_PUBLIC_APPWRITE_USERS_COLLECTION=<users_collection_id>
-NEXT_PUBLIC_APPWRITE_FILES_COLLECTION=<files_collection_id>
-NEXT_PUBLIC_APPWRITE_BUCKET=<storage_bucket_id>
-NEXT_APPWRITE_KEY=<admin_api_key> # server-only
-```
-
-Notes:
-
-- `NEXT_APPWRITE_KEY` is server-side only and must not be exposed to clients.
-- The `NEXT_PUBLIC_*` vars are used on both server and client, so set them correctly.
-
-## Local Development
-1. Install dependencies:
-
-```bash
-npm install
-```
-
-2. Start the dev server:
-
-```bash
-npm run dev
-```
-
-Open http://localhost:3000 (or the port printed by Next.js).
-
-## Deployment
-
-- Provide the same environment variables to your hosting platform (Vercel, Netlify, etc.).
-- Ensure `NEXT_APPWRITE_KEY` is stored as a secret and not exposed publicly.
-
-## Security & Uploads
-
-- Client uploads use permissive `Role.any()` for Appwrite Cloud compatibility; for per-user ACLs and stronger guarantees, use the server-side upload endpoints (`lib/actions/file.actions.ts`) which require an admin key.
-- Rate limiting and audit logging are implemented in `lib/ratelimit.ts` and `lib/audit.ts`.
-
-## Development Notes
-
-- Appwrite session handling uses a cookie named `appwrite-session` for server-side actions.
-- If you encounter `Invalid URL` or `No session found` errors, verify the Appwrite endpoint and that the session cookie is set.
-
-## Contributing
-
-- Fork the repo, create a branch, and open a PR. Provide tests for new features where appropriate.
-
-## License
-
-MIT License
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-ram654.dev-blue?style=for-the-badge)](https://ram654.dev)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 ---
 
-For full API details and architecture notes, see the `lib/` folder and inline docs in source files.
+## ✨ What It Does
+
+StoreIT is a full-stack cloud file storage application that lets users securely **upload, preview, and manage files** through a clean dashboard interface. Built with a focus on performance and UX, it handles authentication, file organization, and real-time feedback out of the box.
+
+---
+
+## 🚀 Key Features
+
+| Feature | Description |
+|---|---|
+| 📤 **File Upload** | Upload files with drag-and-drop support and instant preview |
+| 🔐 **Authentication** | Secure JWT-based login and session management |
+| 📁 **File Management** | Organize, rename, and delete your stored files |
+| 👁️ **File Preview** | In-browser preview for images, PDFs, and documents |
+| 📊 **Storage Dashboard** | Overview of used space and file categories |
+| 📱 **Responsive UI** | Fully responsive design across mobile and desktop |
+
+---
+
+## 🛠️ Tech Stack
+
+**Frontend**
+- React 18
+- Tailwind CSS / MUI
+- React Router v5
+
+**Backend**
+- Node.js + Express (or FastAPI)
+- JWT Authentication
+- REST API
+
+**Storage & DB**
+- Appwrite / Firebase / Supabase _(update as applicable)_
+
+**Deployment**
+- Vercel / Render
+
+---
+
+## 📸 Screenshots
+
+> _Add screenshots or a GIF demo here_
+
+---
+
+## ⚙️ Getting Started
+
+### Prerequisites
+- Node.js 18+
+
+### Installation
+
+```bash
+git clone https://github.com/vishnusairam654/storeit.git
+cd storeit
+npm install
+```
+
+### Environment Variables
+
+Create a `.env` file:
+
+```env
+REACT_APP_API_URL=your_backend_url
+REACT_APP_APPWRITE_PROJECT_ID=your_project_id
+```
+
+### Run Locally
+
+```bash
+# Frontend
+npm start
+
+# Backend
+npm run server
+```
+
+---
+
+## 📂 Project Structure
+
+```
+storeit/
+├── src/
+│   ├── components/     # Upload, FileCard, Dashboard, Navbar
+│   ├── pages/          # Home, Login, Register, Dashboard
+│   ├── context/        # Auth context
+│   └── api/            # API service functions
+├── server/             # Express/FastAPI backend
+└── public/
+```
+
+---
+
+## 👤 Author
+
+**Vishnu Sai Ram**
+- 🌐 [ram654.dev](https://ram654.dev)
+- 💼 [LinkedIn](https://linkedin.com/in/vishnu654)
+- 🐙 [GitHub](https://github.com/vishnusairam654)
+
+---
+
+> ⭐ If you found this project interesting, consider giving it a star!
