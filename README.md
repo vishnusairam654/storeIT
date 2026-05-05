@@ -47,9 +47,13 @@ StoreIT is a full-stack cloud file storage application that lets users securely 
 
 ---
 
-## 📸 Screenshots
+## 📸 Screenshots/Video
 
-> _Add screenshots or a GIF demo here_
+
+
+https://github.com/user-attachments/assets/4a2ba65c-5041-477b-a8f7-424ee104aa54
+
+
 
 ---
 
